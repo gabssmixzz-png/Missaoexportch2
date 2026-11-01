@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sala • Missão Expor Tech</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">📡</div>
+      <h1 id="sala-titulo">Carregando...</h1>
+      <p class="subtitle">Missão Expor Tech</p>
+    </header>
+
+    <div id="loading" class="loading">Carregando desafio...</div>
+
+    <!-- Pedir código se necessário -->
+    <div id="tela-codigo" class="hidden">
+      <div class="card">
+        <h2>🔑 Identifique sua equipe</h2>
+        <p>Digite o código da sua equipe para continuar:</p>
+        <input type="text" id="codigo-sala" placeholder="Ex: FALCAO-01" autocomplete="off" autocapitalize="characters">
+        <div id="msg-codigo" class="hidden"></div>
+        <button id="btn-confirmar-codigo">Confirmar</button>
+      </div>
+    </div>
+
+    <!-- Já concluída -->
+    <div id="tela-ja-concluida" class="hidden">
+      <div class="card">
+        <div class="msg msg-info">
+          ✓ Esta sala já foi concluída pela sua equipe.
+        </div>
+        <p>Procurem outra sala que ainda não visitaram.</p>
+        <a href="/" class="btn mt-1">Voltar ao painel da equipe</a>
+      </div>
+    </div>
+
+    <!-- Desafio -->
+    <div id="tela-desafio" class="hidden">
+      <div class="card">
+        <h2>🧩 Desafio</h2>
+        <div class="desafio-box" id="desafio-texto"></div>
+
+        <div id="ajuda-box" class="hidden">
+          <div class="msg msg-warning" id="ajuda-texto"></div>
+        </div>
+
+        <input type="text" id="resposta-input" placeholder="Digite a resposta aqui..." autocomplete="off">
+        <div id="msg-resposta" class="hidden"></div>
+
+        <button id="btn-enviar">Enviar resposta</button>
+        <button class="btn-secondary mt-1" id="btn-ajuda">💡 Preciso de uma dica</button>
+        <a href="/" class="btn-secondary mt-1" style="display:block;text-align:center;padding:0.8rem">Voltar ao painel</a>
+      </div>
+    </div>
+
+    <!-- Sucesso -->
+    <div id="tela-sucesso" class="hidden">
+      <div class="card">
+        <div class="msg msg-success">
+          🎉 Desafio concluído com sucesso!
+        </div>
+        <div id="nova-pista-box" class="hidden">
+          <h2>🧩 Nova pista liberada</h2>
+          <div class="pista" id="nova-pista-texto"></div>
+        </div>
+        <div id="final-aviso" class="hidden">
+          <div class="msg msg-success mt-1">
+            🏆 Todas as salas foram concluídas! O enigma final está disponível no painel da equipe.
+          </div>
+        </div>
+        <a href="/" class="btn btn-success mt-2">Ver painel da equipe</a>
+      </div>
+    </div>
+
+    <footer class="footer">Missão Expor Tech</footer>
+  </div>
+
+  <script src="sala.js"></script>
+</body>
+</html>

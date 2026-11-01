@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Missão Expor Tech</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">🕵️‍♂️</div>
+      <h1>Missão Expor Tech</h1>
+      <p class="subtitle">Caça ao tesouro tecnológica</p>
+    </header>
+
+    <!-- Tela de entrada -->
+    <div id="tela-entrada">
+      <div class="card">
+        <h2>📜 A Missão</h2>
+        <p>
+          Agentes secretos foram convocados para uma operação especial na feira de tecnologia.
+          Vocês precisam visitar as salas, resolver os desafios e coletar as pistas digitais.
+        </p>
+        <p>
+          Ao final do percurso, a equipe descobrirá a localização de um dos baús escondidos pela escola.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>📋 Regras</h2>
+        <ul class="lista">
+          <li class="pendente">A ordem das salas é livre</li>
+          <li class="pendente">Todos da equipe usam o mesmo código</li>
+          <li class="pendente">Cada sala só conta uma vez</li>
+          <li class="pendente">Progresso é compartilhado entre os celulares da equipe</li>
+          <li class="pendente">Completem todas as salas para liberar o enigma final</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>🔑 Código da Equipe</h2>
+        <p>Digite o código que está no passaporte da sua equipe:</p>
+        <input type="text" id="codigo-input" placeholder="Ex: FALCAO-01" autocomplete="off" autocapitalize="characters">
+        <div id="msg-entrada" class="hidden"></div>
+        <button id="btn-entrar">Entrar na Missão</button>
+      </div>
+    </div>
+
+    <!-- Tela da equipe (após login) -->
+    <div id="tela-equipe" class="hidden">
+      <div class="card">
+        <h2>👥 <span id="equipe-nome">—</span></h2>
+        <p>Código: <strong id="equipe-codigo">—</strong></p>
+        <div class="progress-bar">
+          <div class="fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+        <p class="progress-text" id="progress-text">0 de 0 salas</p>
+      </div>
+
+      <div id="msg-feedback" class="hidden"></div>
+
+      <div class="card" id="card-final" class="hidden">
+        <h2>🏆 Enigma Final Liberado!</h2>
+        <p>Vocês completaram todas as salas. Toque no botão para ver o enigma do baú.</p>
+        <button id="btn-ver-final" class="btn-success">Ver Enigma do Baú</button>
+      </div>
+
+      <div class="card">
+        <h2>📍 Salas</h2>
+        <p style="font-size:0.85rem;color:var(--text-muted)">Escaneie o QR Code de cada sala para resolver o desafio.</p>
+        <ul class="lista" id="lista-salas"></ul>
+      </div>
+
+      <div class="card">
+        <h2>🧩 Pistas conquistadas</h2>
+        <div id="lista-pistas"></div>
+      </div>
+
+      <button class="btn-secondary mt-1" id="btn-sair">Trocar de equipe / Sair</button>
+    </div>
+
+    <!-- Tela do final -->
+    <div id="tela-final" class="hidden">
+      <div class="card">
+        <h2>🏆 Enigma Final</h2>
+        <p id="bau-nome" style="color:var(--accent);font-weight:600"></p>
+        <div class="desafio-box" id="enigma-texto"></div>
+        <p class="mt-1" style="font-size:0.9rem;color:var(--text-muted)">
+          Mostrem este enigma a um responsável da organização para receber a recompensa.
+        </p>
+        <button class="btn-secondary mt-2" id="btn-voltar-equipe">Voltar ao painel</button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      Missão Expor Tech • Feira Escolar
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
