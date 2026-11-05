@@ -1,20 +1,11 @@
 {
   "name": "missao-expor-tech",
-  "version": "1.0.0",
-  "description": "Sistema de caça ao tesouro para feira escolar - Missão Expor Tech",
+  "version": "2.0.0",
+  "description": "Missões ExporTech 2026 - caça ao tesouro por rodadas",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node server.js"
   },
-  "keywords": [
-    "caça-ao-tesouro",
-    "feira-escolar",
-    "educação",
-    "qrcode"
-  ],
-  "author": "",
-  "license": "MIT",
   "engines": {
     "node": ">=18"
   }
