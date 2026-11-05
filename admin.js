@@ -92,12 +92,7 @@ async function carregarRodadas() {
   if (!ok) return;
   const el = $('lista-rodadas');
   el.innerHTML = '';
-  if (!data.podeCriarProxima && data.rodadas.length) {
-    const aviso = document.createElement('div');
-    aviso.className = 'card';
-    aviso.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem">Aguarde o percurso da rodada atual (as duas equipes terminarem todas as salas) para criar a próxima. A busca ao tesouro pode continuar em paralelo.</p>';
-    el.appendChild(aviso);
-  }
+  // Aviso de trava removido — agora permite várias rodadas em paralelo (rotatividade)
   if (!data.rodadas.length) {
     el.innerHTML += '<div class="card"><p style="color:var(--text-muted)">Nenhuma rodada ainda. Crie a <strong>Rodada 1</strong> acima.</p></div>';
     return;
@@ -207,6 +202,7 @@ async function carregarSalas() {
         </div>
       `).join('');
       variantes.forEach((v, i) => {
+        const i2 = i;
         const ta = varBox.querySelector(`textarea[data-i="${i}"]`);
         if (ta) ta.value = v.pergunta || '';
         const r = varBox.querySelector(`input[data-i="${i}"][data-k="respostas"]`);
