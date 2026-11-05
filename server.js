@@ -93,15 +93,15 @@ function getDefaultDB() {
     baus: [
       {
         id: 'A',
-        nome: 'Baú Alfa',
-        local: 'A definir pela organização',
-        enigmaFinal: 'Sua equipe concluiu o percurso! Procure o Baú Alfa e mostre este enigma a um responsável.'
+        nome: 'Baú do Tesouro',
+        local: 'Laboratório de Informática',
+        enigmaFinal: 'Sua equipe concluiu o percurso! Procure o baú no laboratório e mostre este enigma a um responsável.'
       },
       {
         id: 'B',
-        nome: 'Baú Beta',
-        local: 'A definir pela organização',
-        enigmaFinal: 'Sua equipe concluiu o percurso! Procure o Baú Beta e mostre este enigma a um responsável.'
+        nome: 'Baú do Tesouro',
+        local: 'Laboratório de Informática',
+        enigmaFinal: 'Sua equipe concluiu o percurso! Procure o baú no laboratório e mostre este enigma a um responsável.'
       }
     ],
     rodadas: [],
@@ -248,7 +248,6 @@ function proximoNumeroRodada() {
 }
 
 function podeCriarProximaRodada() {
-  // Agora sempre permite criar novas rodadas em paralelo (rotatividade de turmas)
   return true;
 }
 
@@ -298,7 +297,7 @@ async function handleAPI(req, res, pathname) {
     const prog = progressoEquipe(equipe, rodada);
     let enigmaFinal = null;
     if (prog.percursoCompleto && (rodada.status === 'percurso_concluido' || rodada.status === 'finalizada')) {
-      const bau = db.baus.find(b => b.id === equipe.bauId);
+      const bau = db.baus.find(b => b.id === equipe.bauId) || db.baus[0];
       if (bau) enigmaFinal = { bauNome: bau.nome, texto: bau.enigmaFinal };
     }
     return jsonResponse(res, 200, {
@@ -408,7 +407,7 @@ async function handleAPI(req, res, pathname) {
     if (rodada.status !== 'percurso_concluido' && rodada.status !== 'finalizada') {
       return jsonResponse(res, 403, { erro: 'Aguarde a outra equipe terminar o percurso para liberar o tesouro.', progresso: prog });
     }
-    const bau = db.baus.find(b => b.id === equipe.bauId);
+    const bau = db.baus.find(b => b.id === equipe.bauId) || db.baus[0];
     if (!bau) return jsonResponse(res, 500, { erro: 'Baú não configurado.' });
     return jsonResponse(res, 200, { sucesso: true, bauNome: bau.nome, enigmaFinal: bau.enigmaFinal, pontos: equipe.pontos || 0, recompensaEntregue: !!equipe.recompensaEntregue });
   }
@@ -454,7 +453,6 @@ async function handleAPI(req, res, pathname) {
 
     if (pathname === '/api/admin/rodadas' && method === 'POST') {
       const body = await parseBody(req);
-      // Rodadas paralelas liberadas — pode criar várias ao mesmo tempo
       const numero = proximoNumeroRodada();
       const eq1Codigo = (body.equipe1Codigo || ('R' + numero + '-A')).toUpperCase().trim();
       const eq2Codigo = (body.equipe2Codigo || ('R' + numero + '-B')).toUpperCase().trim();
@@ -465,7 +463,7 @@ async function handleAPI(req, res, pathname) {
         numero, status: 'em_andamento', salaAtualOrdem: 1, criadaEm: new Date().toISOString(),
         equipes: [
           { id: 'eq-' + crypto.randomBytes(3).toString('hex'), codigo: eq1Codigo, nome: body.equipe1Nome || ('Equipe A — Rodada ' + numero), qtdIntegrantes: 5, bauId: 'A', pontos: 0, salasConcluidas: [], percursoCompleto: false, tesouroEncontrado: false, recompensaEntregue: false },
-          { id: 'eq-' + crypto.randomBytes(3).toString('hex'), codigo: eq2Codigo, nome: body.equipe2Nome || ('Equipe B — Rodada ' + numero), qtdIntegrantes: 5, bauId: 'B', pontos: 0, salasConcluidas: [], percursoCompleto: false, tesouroEncontrado: false, recompensaEntregue: false }
+          { id: 'eq-' + crypto.randomBytes(3).toString('hex'), codigo: eq2Codigo, nome: body.equipe2Nome || ('Equipe B — Rodada ' + numero), qtdIntegrantes: 5, bauId: 'A', pontos: 0, salasConcluidas: [], percursoCompleto: false, tesouroEncontrado: false, recompensaEntregue: false }
         ]
       };
       db.rodadas.push(nova);
