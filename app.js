@@ -11,6 +11,10 @@ function setCodigo(c) {
   localStorage.setItem(STORAGE_KEY, v);
   localStorage.setItem('missao_expor_tech_codigo', v); // compat com sala.js antigo
 }
+function limparCodigo() {
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('missao_expor_tech_codigo');
+}
 
 async function entrar() {
   const codigo = (($('codigo-input') && $('codigo-input').value) || '').trim().toUpperCase();
@@ -37,6 +41,21 @@ async function entrar() {
   } catch (e) {
     if (msgEl) { msgEl.className = 'msg msg-error'; msgEl.textContent = 'Erro de conexão.'; msgEl.classList.remove('hidden'); }
   }
+}
+
+function sair() {
+  if (!confirm('Sair desta equipe? Você vai precisar digitar o código de novo para jogar.')) return;
+  limparCodigo();
+  fecharScanner();
+  hide('tela-equipe');
+  hide('tela-final');
+  show('tela-entrada');
+  if ($('codigo-input')) {
+    $('codigo-input').value = '';
+    $('codigo-input').focus();
+  }
+  const msgEl = $('msg-entrada');
+  if (msgEl) msgEl.classList.add('hidden');
 }
 
 function renderPainel(data) {
@@ -140,14 +159,12 @@ let scannerAtivo = false;
 function extrairSlugDoQR(texto) {
   if (!texto) return null;
   texto = texto.trim();
-  // Aceita URL completa: https://site.com/sala/video  ou  /sala/video  ou só o slug
   try {
     const u = new URL(texto, location.origin);
     const parts = u.pathname.split('/').filter(Boolean);
     const idx = parts.indexOf('sala');
     if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
   } catch (e) {}
-  // Fallback: se for só o slug
   if (/^[a-z0-9\-]+$/i.test(texto)) return texto;
   return null;
 }
@@ -179,12 +196,11 @@ async function abrirScanner() {
         const slug = extrairSlugDoQR(decodedText);
         if (slug) {
           fecharScanner().then(() => {
-            // Código já está salvo no localStorage → vai direto para a sala
             location.href = '/sala/' + encodeURIComponent(slug);
           });
         }
       },
-      () => {} // ignore scan failures
+      () => {}
     );
   } catch (err) {
     scannerAtivo = false;
@@ -228,4 +244,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   if ($('btn-abrir-scanner')) $('btn-abrir-scanner').addEventListener('click', abrirScanner);
   if ($('btn-fechar-scanner')) $('btn-fechar-scanner').addEventListener('click', fecharScanner);
+  if ($('btn-sair')) $('btn-sair').addEventListener('click', sair);
 });
