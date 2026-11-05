@@ -67,6 +67,20 @@
         <button id="btn-ver-final" class="btn-success">Ver Enigma do Baú</button>
       </div>
 
+      <!-- Scanner de QR dentro do painel -->
+      <div class="card">
+        <h2>📷 Escanear QR da sala</h2>
+        <p style="font-size:0.85rem;color:var(--text-muted)">
+          Aponte a câmera para o QR Code da sala. Não precisa digitar o código de novo.
+        </p>
+        <div id="scanner-area" class="hidden">
+          <div id="qr-reader" style="width:100%;border-radius:12px;overflow:hidden;margin-bottom:0.75rem;"></div>
+          <button class="btn-secondary" id="btn-fechar-scanner">Fechar câmera</button>
+        </div>
+        <button id="btn-abrir-scanner">Abrir câmera e escanear</button>
+        <div id="msg-scanner" class="hidden"></div>
+      </div>
+
       <div class="card">
         <h2>📍 Salas</h2>
         <p style="font-size:0.85rem;color:var(--text-muted)">Escaneie o QR Code de cada sala para resolver o desafio.</p>
@@ -97,6 +111,7 @@
     </footer>
   </div>
 
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
