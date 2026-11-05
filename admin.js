@@ -92,7 +92,6 @@ async function carregarRodadas() {
   if (!ok) return;
   const el = $('lista-rodadas');
   el.innerHTML = '';
-  // Aviso de trava removido — agora permite várias rodadas em paralelo (rotatividade)
   if (!data.rodadas.length) {
     el.innerHTML += '<div class="card"><p style="color:var(--text-muted)">Nenhuma rodada ainda. Crie a <strong>Rodada 1</strong> acima.</p></div>';
     return;
@@ -105,7 +104,7 @@ async function carregarRodadas() {
       <div class="eq-row">
         <div>
           <strong>${e.nome}</strong><br>
-          <span style="color:var(--text-muted);font-size:0.8rem">Código: ${e.codigo} · Baú ${e.bauId} · ${e.qtdConcluidas} salas · ${e.pontos} pts</span>
+          <span style="color:var(--text-muted);font-size:0.8rem">Código: ${e.codigo} · ${e.qtdConcluidas} salas · ${e.pontos} pts</span>
         </div>
         <div>
           ${e.recompensaEntregue || e.tesouroEncontrado
@@ -202,7 +201,6 @@ async function carregarSalas() {
         </div>
       `).join('');
       variantes.forEach((v, i) => {
-        const i2 = i;
         const ta = varBox.querySelector(`textarea[data-i="${i}"]`);
         if (ta) ta.value = v.pergunta || '';
         const r = varBox.querySelector(`input[data-i="${i}"][data-k="respostas"]`);
@@ -258,38 +256,51 @@ async function carregarBaus() {
   if (!ok) return;
   const el = $('lista-baus-admin');
   el.innerHTML = '';
-  (data.baus || []).forEach(b => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.style.marginBottom = '1rem';
-    card.innerHTML = `
-      <h3 style="color:var(--accent)">Baú ${b.id}</h3>
-      <div class="form-row"><label>Nome</label><input data-k="nome" type="text"></div>
-      <div class="form-row"><label>Local (só organização)</label><input data-k="local" type="text"></div>
-      <div class="form-row"><label>Enigma final (equipe vê)</label><textarea data-k="enigma"></textarea></div>
-      <button class="btn-success" data-save>Salvar baú ${b.id}</button>
-      <div class="msg hidden" data-msg></div>
-    `;
-    el.appendChild(card);
-    card.querySelector('[data-k="nome"]').value = b.nome || '';
-    card.querySelector('[data-k="local"]').value = b.local || '';
-    card.querySelector('[data-k="enigma"]').value = b.enigmaFinal || '';
-    card.querySelector('[data-save]').addEventListener('click', async () => {
-      const atualizados = (data.baus || []).map(x => {
-        if (x.id !== b.id) return x;
-        return {
-          ...x,
-          nome: card.querySelector('[data-k="nome"]').value.trim(),
-          local: card.querySelector('[data-k="local"]').value.trim(),
-          enigmaFinal: card.querySelector('[data-k="enigma"]').value.trim()
-        };
-      });
-      const res = await api('/api/admin/baus', { method: 'POST', body: JSON.stringify({ baus: atualizados }) });
-      const m = card.querySelector('[data-msg]');
-      m.className = res.ok ? 'msg msg-success' : 'msg msg-error';
-      m.textContent = res.ok ? 'Salvo!' : 'Erro';
-      m.classList.remove('hidden');
-    });
+
+  const baus = data.baus || [];
+  const b = baus[0] || { id: 'A', nome: 'Baú do Tesouro', local: '', enigmaFinal: '' };
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <h3 style="color:var(--accent)">🏆 Baú do Tesouro</h3>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">
+      As duas equipes da rodada usam o mesmo baú e o mesmo enigma final.
+    </p>
+    <div class="form-row"><label>Nome</label><input data-k="nome" type="text"></div>
+    <div class="form-row"><label>Local (só organização vê)</label><input data-k="local" type="text"></div>
+    <div class="form-row"><label>Enigma final (equipe vê no celular)</label><textarea data-k="enigma" rows="5"></textarea></div>
+    <button class="btn-success" data-save>Salvar baú</button>
+    <div class="msg hidden" data-msg></div>
+  `;
+  el.appendChild(card);
+  card.querySelector('[data-k="nome"]').value = b.nome || '';
+  card.querySelector('[data-k="local"]').value = b.local || '';
+  card.querySelector('[data-k="enigma"]').value = b.enigmaFinal || '';
+
+  card.querySelector('[data-save]').addEventListener('click', async () => {
+    const fresh = await api('/api/admin/baus');
+    let lista = (fresh.ok && fresh.data.baus) ? fresh.data.baus.slice() : [];
+    if (!lista.length) {
+      lista = [{ id: 'A', nome: 'Baú do Tesouro', local: '', enigmaFinal: '' }];
+    }
+    lista[0] = {
+      ...lista[0],
+      id: lista[0].id || 'A',
+      nome: card.querySelector('[data-k="nome"]').value.trim() || 'Baú do Tesouro',
+      local: card.querySelector('[data-k="local"]').value.trim(),
+      enigmaFinal: card.querySelector('[data-k="enigma"]').value.trim()
+    };
+    if (lista.length > 1) {
+      lista[1] = { ...lista[1], nome: lista[0].nome, local: lista[0].local, enigmaFinal: lista[0].enigmaFinal };
+    } else {
+      lista.push({ id: 'B', nome: lista[0].nome, local: lista[0].local, enigmaFinal: lista[0].enigmaFinal });
+    }
+    const res = await api('/api/admin/baus', { method: 'POST', body: JSON.stringify({ baus: lista }) });
+    const m = card.querySelector('[data-msg]');
+    m.className = res.ok ? 'msg msg-success' : 'msg msg-error';
+    m.textContent = res.ok ? 'Salvo! Enigma atualizado para as duas equipes.' : 'Erro ao salvar';
+    m.classList.remove('hidden');
   });
 }
 
