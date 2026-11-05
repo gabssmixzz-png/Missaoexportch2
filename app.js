@@ -2,11 +2,15 @@
 const STORAGE_KEY = 'missao_codigo';
 
 function $(id) { return document.getElementById(id); }
-function show(el) { if (typeof el === 'string') el = $(el); if (el) { el.classList.remove('hidden'); el.classList.remove('class'); } }
+function show(el) { if (typeof el === 'string') el = $(el); if (el) { el.classList.remove('hidden'); } }
 function hide(el) { if (typeof el === 'string') el = $(el); if (el) el.classList.add('hidden'); }
 
 function getCodigo() { return (localStorage.getItem(STORAGE_KEY) || '').toUpperCase(); }
-function setCodigo(c) { localStorage.setItem(STORAGE_KEY, (c || '').toUpperCase()); }
+function setCodigo(c) {
+  const v = (c || '').toUpperCase();
+  localStorage.setItem(STORAGE_KEY, v);
+  localStorage.setItem('missao_expor_tech_codigo', v); // compat com sala.js antigo
+}
 
 async function entrar() {
   const codigo = (($('codigo-input') && $('codigo-input').value) || '').trim().toUpperCase();
@@ -52,7 +56,6 @@ function renderPainel(data) {
   if (lista) {
     lista.innerHTML = '';
     const salaAtual = prog.salaAtual;
-    const done = new Set((prog.concluidas || []).map(c => c.id));
     const items = [];
     (prog.concluidas || []).forEach(s => items.push({ ...s, st: 'ok' }));
     (prog.pendentes || []).forEach(s => {
@@ -130,6 +133,82 @@ async function verFinal() {
   }
 }
 
+// ========== Scanner de QR ==========
+let html5QrCode = null;
+let scannerAtivo = false;
+
+function extrairSlugDoQR(texto) {
+  if (!texto) return null;
+  texto = texto.trim();
+  // Aceita URL completa: https://site.com/sala/video  ou  /sala/video  ou só o slug
+  try {
+    const u = new URL(texto, location.origin);
+    const parts = u.pathname.split('/').filter(Boolean);
+    const idx = parts.indexOf('sala');
+    if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
+  } catch (e) {}
+  // Fallback: se for só o slug
+  if (/^[a-z0-9\-]+$/i.test(texto)) return texto;
+  return null;
+}
+
+async function abrirScanner() {
+  const msgEl = $('msg-scanner');
+  if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
+
+  if (!window.Html5Qrcode) {
+    if (msgEl) {
+      msgEl.className = 'msg msg-error';
+      msgEl.textContent = 'Biblioteca de câmera não carregou. Atualize a página.';
+      msgEl.classList.remove('hidden');
+    }
+    return;
+  }
+
+  show('scanner-area');
+  hide('btn-abrir-scanner');
+
+  html5QrCode = new Html5Qrcode('qr-reader');
+  scannerAtivo = true;
+
+  try {
+    await html5QrCode.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decodedText) => {
+        const slug = extrairSlugDoQR(decodedText);
+        if (slug) {
+          fecharScanner().then(() => {
+            // Código já está salvo no localStorage → vai direto para a sala
+            location.href = '/sala/' + encodeURIComponent(slug);
+          });
+        }
+      },
+      () => {} // ignore scan failures
+    );
+  } catch (err) {
+    scannerAtivo = false;
+    hide('scanner-area');
+    show('btn-abrir-scanner');
+    if (msgEl) {
+      msgEl.className = 'msg msg-error';
+      msgEl.textContent = 'Não foi possível abrir a câmera. Verifique a permissão do navegador.';
+      msgEl.classList.remove('hidden');
+    }
+  }
+}
+
+async function fecharScanner() {
+  if (html5QrCode && scannerAtivo) {
+    try { await html5QrCode.stop(); } catch (e) {}
+    try { html5QrCode.clear(); } catch (e) {}
+  }
+  scannerAtivo = false;
+  html5QrCode = null;
+  hide('scanner-area');
+  show('btn-abrir-scanner');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const codigo = getCodigo();
   if (codigo && $('codigo-input')) {
@@ -147,4 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
     show('tela-equipe');
     atualizarPainel();
   });
+  if ($('btn-abrir-scanner')) $('btn-abrir-scanner').addEventListener('click', abrirScanner);
+  if ($('btn-fechar-scanner')) $('btn-fechar-scanner').addEventListener('click', fecharScanner);
 });
