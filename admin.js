@@ -47,6 +47,7 @@ async function login() {
   show('tela-admin');
   carregarDashboard();
   carregarEquipes();
+  carregarRodadas();
 }
 
 function logout() {
