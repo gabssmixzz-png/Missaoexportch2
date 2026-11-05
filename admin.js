@@ -68,6 +68,7 @@ document.querySelectorAll('#nav button').forEach(btn => {
 
     if (btn.dataset.tab === 'dashboard') carregarDashboard();
     if (btn.dataset.tab === 'equipes') carregarEquipes();
+    if (btn.dataset.tab === 'rodadas') carregarRodadas();
     if (btn.dataset.tab === 'salas') carregarSalas();
     if (btn.dataset.tab === 'baus') carregarBaus();
   });
@@ -200,6 +201,14 @@ async function resetEquipe(codigo) {
   carregarEquipes();
 }
 
+// ===== RODADAS =====
+async function carregarRodadas(){
+ const {ok,data}=await api('/api/admin/rodadas');if(!ok)return;
+ const selects=[$('rodada-eq1'),$('rodada-eq2')];selects.forEach(s=>{if(!s)return;s.innerHTML='<option value="">Selecione equipe</option>'+data.equipes.map(e=>'<option value="'+e.codigo+'">'+e.codigo+' — '+e.nome+'</option>').join('');});
+ const el=$('lista-rodadas');if(!el)return;el.innerHTML='';
+ (data.rodadas||[]).forEach(r=>{const card=document.createElement('div');card.className='card';card.style.marginBottom='1rem';const teams=(r.equipes||[]).join(' × ');card.innerHTML='<h3>'+r.nome+'</h3><p><b>Equipes:</b> '+teams+'</p><p><b>Status:</b> '+r.status+'</p><p><b>Sala atual:</b> '+((r.salaAtualId||'')||'Percurso concluído')+'</p><p><b>Vencedor do tesouro:</b> '+(r.vencedorTesouro||'Ainda não registrado')+'</p><div class="flex"><button class="btn-success" data-start>Iniciar</button><button class="btn-secondary" data-next>Avançar sala</button><button class="btn-secondary" data-treasure>Registrar tesouro</button><button class="btn-danger" data-reset>Reiniciar</button></div>';el.appendChild(card);async function act(action,codigo){const res=await api('/api/admin/rodadas',{method:'POST',body:JSON.stringify({id:r.id,action,codigo})});if(!res.ok)alert(res.data.erro||'Falha');else carregarRodadas();}card.querySelector('[data-start]').onclick=()=>act('start');card.querySelector('[data-next]').onclick=()=>act('next');card.querySelector('[data-reset]').onclick=()=>{if(confirm('Reiniciar esta rodada?'))act('reset')};card.querySelector('[data-treasure]').onclick=()=>{const codigo=prompt('Código da equipe que encontrou o tesouro:');if(codigo)act('treasure',codigo.trim().toUpperCase())};});
+}
+async function criarRodada(){const a=$('rodada-eq1').value,b=$('rodada-eq2').value,nome=$('rodada-nome').value.trim();if(!a||!b||a===b){msg('msg-rodada','Selecione duas equipes diferentes.','error');return;}const res=await api('/api/admin/rodadas',{method:'POST',body:JSON.stringify({action:'create',nome,equipes:[a,b]})});if(!res.ok){msg('msg-rodada',res.data.erro||'Erro ao criar rodada.','error');return;}msg('msg-rodada','Rodada criada!','success');$('rodada-nome').value='';carregarRodadas();}
 // ===== SALAS =====
 async function criarNovaSala() {
   const nome = $('nova-sala-nome').value.trim();
@@ -436,6 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-criar-equipe').addEventListener('click', criarEquipe);
   $('btn-cancelar-edit').addEventListener('click', cancelarEditEquipe);
   $('btn-nova-sala').addEventListener('click', criarNovaSala);
+  $('btn-criar-rodada').addEventListener('click', criarRodada);
 
   if (adminPass) {
     hide('tela-login');
