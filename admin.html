@@ -39,6 +39,7 @@
       <div class="admin-nav" id="nav">
         <button data-tab="dashboard" class="active">Dashboard</button>
         <button data-tab="equipes">Equipes</button>
+        <button data-tab="rodadas">Rodadas</button>
         <button data-tab="salas">Salas</button>
         <button data-tab="baus">Baús</button>
       </div>
@@ -99,6 +100,11 @@
             </table>
           </div>
         </div>
+      </div>
+
+      <!-- Rodadas -->
+      <div id="tab-rodadas" class="tab hidden">
+        <div class="card"><h2>Nova rodada</h2><p>Escolha duas equipes para percorrerem juntas as salas. O baú continua no mesmo esconderijo entre rodadas.</p><div class="form-row"><label>Nome</label><input id="rodada-nome" placeholder="Rodada 1"></div><div class="form-row"><label>Equipe 1</label><select id="rodada-eq1"></select></div><div class="form-row"><label>Equipe 2</label><select id="rodada-eq2"></select></div><button id="btn-criar-rodada" class="btn-success">Criar rodada</button><div id="msg-rodada" class="hidden"></div></div><div class="card"><h2>Rodadas cadastradas</h2><div id="lista-rodadas"></div></div>
       </div>
 
       <!-- Salas -->
