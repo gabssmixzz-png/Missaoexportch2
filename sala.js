@@ -1,6 +1,6 @@
 // Missão Expor Tech - Página da sala (desafio)
 
-const STORAGE_KEY = 'missao_expor_tech_codigo';
+const STORAGE_KEY = 'missao_codigo'; // unificado com o painel
 
 function $(id) { return document.getElementById(id); }
 function show(el) { if (typeof el === 'string') el = $(el); if (el) el.classList.remove('hidden'); }
@@ -28,15 +28,17 @@ async function api(path, options = {}) {
 }
 
 function getCodigo() {
-  return (localStorage.getItem(STORAGE_KEY) || '').trim().toUpperCase();
+  // Compatibilidade: tenta a chave nova e a antiga
+  return (localStorage.getItem(STORAGE_KEY) || localStorage.getItem('missao_expor_tech_codigo') || '').trim().toUpperCase();
 }
 
 function salvarCodigo(c) {
-  localStorage.setItem(STORAGE_KEY, (c || '').trim().toUpperCase());
+  const v = (c || '').trim().toUpperCase();
+  localStorage.setItem(STORAGE_KEY, v);
+  localStorage.setItem('missao_expor_tech_codigo', v); // mantém compat
 }
 
 function getSlug() {
-  // /sala/robotica  ou  path after /sala/
   const parts = location.pathname.split('/').filter(Boolean);
   const idx = parts.indexOf('sala');
   return idx >= 0 && parts[idx + 1] ? parts[idx + 1] : '';
@@ -85,7 +87,6 @@ async function carregarSala() {
     return;
   }
 
-  // Mostra desafio
   $('desafio-texto').textContent = data.sala.desafio;
   if (data.sala.ajuda) {
     $('ajuda-texto').textContent = data.sala.ajuda;
@@ -102,7 +103,6 @@ async function confirmarCodigo() {
     return;
   }
 
-  // Valida o código entrando
   const { ok, data } = await api('/api/equipe/entrar', {
     method: 'POST',
     body: JSON.stringify({ codigo })
@@ -115,7 +115,6 @@ async function confirmarCodigo() {
 
   salvarCodigo(codigo);
   hide('tela-codigo');
-  // Recarrega a sala agora com código
   show('loading');
   await carregarSala();
 }
@@ -155,7 +154,6 @@ async function enviarResposta() {
     return;
   }
 
-  // Sucesso!
   hide('tela-desafio');
   show('tela-sucesso');
 
