@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin • Missões ExporTech 2026</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .container { max-width: 800px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    .stat { background: var(--bg-input); border-radius: 12px; padding: 0.9rem; text-align: center; border: 1px solid var(--border); }
+    .stat .num { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .stat .label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+    textarea { min-height: 70px; font-family: inherit; width: 100%; padding: 0.75rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; color: var(--text); margin-bottom: 0.5rem; }
+    .form-row { margin-bottom: 0.75rem; }
+    .form-row label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+    .link-sala { font-size: 0.8rem; color: var(--accent-bright); word-break: break-all; background: var(--bg-input); padding: 0.5rem 0.75rem; border-radius: 8px; margin: 0.5rem 0; }
+    .rodada-card { border: 1px solid var(--border); border-radius: 14px; padding: 1rem; margin-bottom: 1rem; background: var(--bg-card); }
+    .rodada-card h3 { margin: 0 0 0.5rem; color: var(--accent); }
+    .status-pill { display: inline-block; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: 600; }
+    .st-andamento { background: #1e3a5f; color: #7dd3fc; }
+    .st-percurso { background: #14532d; color: #86efac; }
+    .st-finalizada { background: #3f3f46; color: #d4d4d8; }
+    .eq-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-top: 1px solid var(--border); font-size: 0.9rem; }
+    .admin-nav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .admin-nav button { flex: 1 1 auto; min-width: 90px; font-size: 0.85rem; padding: 0.65rem 0.5rem; }
+    .admin-nav button.active { outline: 2px solid var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <img src="https://www.exportech.online/logo.png" alt="ExporTech" class="logo-img" onerror="this.style.display='none'" style="max-width:100px">
+      <h1>Painel da Organização</h1>
+      <p class="subtitle">Missões ExporTech 2026</p>
+    </header>
+
+    <div id="tela-login">
+      <div class="card">
+        <h2>Acesso restrito</h2>
+        <p>Digite a senha de administrador:</p>
+        <input type="password" id="senha-admin" placeholder="Senha">
+        <div id="msg-login" class="hidden"></div>
+        <button id="btn-login">Entrar</button>
+      </div>
+    </div>
+
+    <div id="tela-admin" class="hidden">
+      <div class="admin-nav" id="nav">
+        <button data-tab="dashboard" class="active">Início</button>
+        <button data-tab="rodadas">Rodadas</button>
+        <button data-tab="salas">Salas</button>
+        <button data-tab="baus">Baús</button>
+        <button data-tab="textos">Textos</button>
+      </div>
+
+      <div id="tab-dashboard" class="tab">
+        <div class="stat-grid" id="stats"></div>
+        <div class="card">
+          <h2>Controle do jogo</h2>
+          <p id="status-jogo">—</p>
+          <div class="flex mt-1">
+            <button id="btn-abrir" class="btn-success">Abrir jogo</button>
+            <button id="btn-fechar" class="btn-danger">Fechar jogo</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Backup</h2>
+          <p style="font-size:0.9rem;color:var(--text-muted)">Exporte os dados depois de organizar as rodadas. Se precisar restaurar, importe o arquivo.</p>
+          <div class="flex mt-1">
+            <button id="btn-exportar" class="btn-success">Exportar</button>
+            <button id="btn-importar" class="btn-secondary">Importar</button>
+          </div>
+          <input type="file" id="input-import" accept="application/json,.json" class="hidden">
+          <div id="msg-backup" class="hidden mt-1"></div>
+        </div>
+      </div>
+
+      <div id="tab-rodadas" class="tab hidden">
+        <div class="card">
+          <h2>Nova rodada</h2>
+          <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:0.75rem">
+            Cada rodada = <strong>10 participantes</strong> em <strong>2 equipes de 5</strong>.
+            A numeração começa em <strong>Rodada 1</strong>.
+            A próxima só libera quando as duas equipes da rodada atual terminarem o percurso (não precisa achar o tesouro).
+          </p>
+          <div class="form-row">
+            <label>Código equipe A</label>
+            <input type="text" id="r-eq1-cod" placeholder="Ex: R1-AZUL" autocapitalize="characters">
+          </div>
+          <div class="form-row">
+            <label>Nome equipe A</label>
+            <input type="text" id="r-eq1-nome" placeholder="Equipe Azul">
+          </div>
+          <div class="form-row">
+            <label>Código equipe B</label>
+            <input type="text" id="r-eq2-cod" placeholder="Ex: R1-VERDE" autocapitalize="characters">
+          </div>
+          <div class="form-row">
+            <label>Nome equipe B</label>
+            <input type="text" id="r-eq2-nome" placeholder="Equipe Verde">
+          </div>
+          <button id="btn-criar-rodada" class="btn-success">Criar rodada</button>
+          <div id="msg-rodada" class="hidden mt-1"></div>
+        </div>
+        <div id="lista-rodadas"></div>
+      </div>
+
+      <div id="tab-salas" class="tab hidden">
+        <div class="card">
+          <h2>Salas do percurso</h2>
+          <p style="font-size:0.9rem;color:var(--text-muted)">Ordem fixa. Link do QR em cada sala. Várias perguntas (variantes) por sala.</p>
+          <div id="lista-salas-admin"></div>
+        </div>
+      </div>
+
+      <div id="tab-baus" class="tab hidden">
+        <div class="card">
+          <h2>Baús</h2>
+          <div id="lista-baus-admin"></div>
+        </div>
+      </div>
+
+      <div id="tab-textos" class="tab hidden">
+        <div class="card">
+          <h2>Mensagem inicial (Pista 1)</h2>
+          <textarea id="texto-pista1" rows="4"></textarea>
+          <button id="btn-salvar-pista1" class="btn-success mt-1">Salvar</button>
+          <div id="msg-pista1" class="hidden mt-1"></div>
+        </div>
+      </div>
+
+      <button class="btn-secondary mt-2" id="btn-logout">Sair</button>
+    </div>
+    <footer class="footer">Missões ExporTech 2026 • Admin</footer>
+  </div>
+  <script src="/admin.js"></script>
+</body>
+</html>
