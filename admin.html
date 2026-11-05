@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin • Missões ExporTech 2026</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .container { max-width: 720px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    .stat { background: var(--bg-input); border-radius: 10px; padding: 0.9rem; text-align: center; }
+    .stat .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+    .stat .label { font-size: 0.8rem; color: var(--text-muted); }
+    textarea { min-height: 70px; font-family: inherit; width: 100%; padding: 0.75rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; color: var(--text); margin-bottom: 0.5rem; }
+    .form-row { margin-bottom: 0.75rem; }
+    .form-row label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+    .link-sala { font-size: 0.8rem; color: var(--accent-bright); word-break: break-all; background: var(--bg-input); padding: 0.5rem 0.75rem; border-radius: 8px; margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <img src="https://www.exportech.online/logo.png" alt="ExporTech" class="logo-img" onerror="this.style.display='none'" style="max-width:100px">
+      <h1>Painel da Organização</h1>
+      <p class="subtitle">Missões ExporTech 2026</p>
+    </header>
+
+    <div id="tela-login">
+      <div class="card">
+        <h2>🔐 Acesso restrito</h2>
+        <p>Digite a senha de administrador:</p>
+        <input type="password" id="senha-admin" placeholder="Senha">
+        <div id="msg-login" class="hidden"></div>
+        <button id="btn-login">Entrar</button>
+      </div>
+    </div>
+
+    <div id="tela-admin" class="hidden">
+      <div class="admin-nav" id="nav">
+        <button data-tab="dashboard" class="active">Dashboard</button>
+        <button data-tab="equipes">Equipes</button>
+        <button data-tab="rodadas" class="btn-success">🎯 Rodadas</button>
+        <button data-tab="salas">Salas</button>
+        <button data-tab="baus">Baús</button>
+      </div>
+
+      <!-- Dashboard -->
+      <div id="tab-dashboard" class="tab">
+        <div class="stat-grid" id="stats"></div>
+        <div class="card">
+          <h2>Controle do jogo</h2>
+          <p id="status-jogo">—</p>
+          <div class="flex mt-1">
+            <button id="btn-abrir" class="btn-success">Abrir jogo</button>
+            <button id="btn-fechar" class="btn-danger">Fechar jogo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Equipes -->
+      <div id="tab-equipes" class="tab hidden">
+        <div class="card">
+          <h2 id="eq-form-titulo">Criar equipe</h2>
+          <input type="hidden" id="eq-id" value="">
+          <div class="form-row">
+            <label>Código (único) — você escolhe</label>
+            <input type="text" id="eq-codigo" placeholder="Ex: AZUL-01" autocapitalize="characters">
+          </div>
+          <div class="form-row">
+            <label>Nome da equipe</label>
+            <input type="text" id="eq-nome" placeholder="Equipe Azul">
+          </div>
+          <div class="form-row">
+            <label>Qtd. integrantes</label>
+            <input type="text" id="eq-qtd" value="5">
+          </div>
+          <div class="form-row">
+            <label>Baú (A ou B — vazio = automático)</label>
+            <input type="text" id="eq-bau" placeholder="A ou B">
+          </div>
+          <button id="btn-criar-equipe">Salvar equipe</button>
+          <button id="btn-cancelar-edit" class="btn-secondary mt-1 hidden">Cancelar edição</button>
+          <div id="msg-equipe" class="hidden mt-1"></div>
+        </div>
+
+        <div class="card">
+          <h2>Equipes cadastradas</h2>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nome</th>
+                  <th>Prog.</th>
+                  <th>Baú</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-equipes"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rodadas -->
+      <div id="tab-rodadas" class="tab hidden">
+        <div class="card"><h2>Nova rodada</h2><p>Escolha duas equipes para percorrerem juntas as salas. O baú continua no mesmo esconderijo entre rodadas.</p><div class="form-row"><label>Nome</label><input id="rodada-nome" placeholder="Rodada 1"></div><div class="form-row"><label>Equipe 1</label><select id="rodada-eq1"></select></div><div class="form-row"><label>Equipe 2</label><select id="rodada-eq2"></select></div><button id="btn-criar-rodada" class="btn-success">Criar rodada</button><div id="msg-rodada" class="hidden"></div></div><div class="card"><h2>Rodadas cadastradas</h2><div id="lista-rodadas"></div></div>
+      </div>
+
+      <!-- Salas -->
+      <div id="tab-salas" class="tab hidden">
+        <div class="card">
+          <h2>Nova sala</h2>
+          <div class="form-row">
+            <label>Nome da sala</label>
+            <input type="text" id="nova-sala-nome" placeholder="Ex: Sala de Informática">
+          </div>
+          <div class="form-row">
+            <label>Slug (gera o link, sem espaços)</label>
+            <input type="text" id="nova-sala-slug" placeholder="Ex: informatica">
+          </div>
+          <button id="btn-nova-sala" class="btn-success">Criar sala</button>
+          <div id="msg-nova-sala" class="hidden mt-1"></div>
+        </div>
+
+        <div class="card">
+          <h2>Salas e desafios</h2>
+          <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:1rem">
+            Cada sala pode ter várias perguntas (variantes). Cada equipe recebe uma diferente. O link do QR aparece em cada sala.
+          </p>
+          <div id="lista-salas-admin"></div>
+        </div>
+      </div>
+
+      <!-- Baús -->
+      <div id="tab-baus" class="tab hidden">
+        <div class="card">
+          <h2>Baús e locais</h2>
+          <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:1rem">
+            Configure o nome, o local real e o texto do enigma final que a equipe verá ao terminar.
+          </p>
+          <div id="lista-baus-admin"></div>
+        </div>
+      </div>
+
+      <button class="btn-secondary mt-2" id="btn-logout">Sair do painel</button>
+    </div>
+
+    <footer class="footer">Missões ExporTech 2026 • Admin</footer>
+  </div>
+
+  <script src="/admin.js?v=rodadasfix20261105c"></script>
+  <!-- cache-refresh-2026-11-05-rounds -->
+</body>
+</html>
